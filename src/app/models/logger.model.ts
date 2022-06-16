@@ -22,12 +22,11 @@ export class YADBLogger implements ILogger {
     const result: Promise<Message<boolean>>[] = [];
     const maxlen = DISCORD_MAX_MSG_LENGTH - language.length - 8;
 
-    if (!this.logChannel) {
-      throw Error('El canal logger no está definido.');
-    }
-
     chunkString(text, maxlen).forEach((chunk) => {
-      this.logChannel?.send(markdown(chunk, language));
+      if (!this.logChannel) {
+        throw Error('El canal logger no está definido.');
+      }
+      this.logChannel.send(markdown(chunk, language));
     });
 
     return Promise.all(result);

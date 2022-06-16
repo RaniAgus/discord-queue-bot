@@ -13,15 +13,17 @@ export const ping: ICommandHandler = {
     return true;
   },
   async handle({ interaction }: ICommandInteraction) {
+    const text = `${interaction.ping}ms`;
+
     const reply = await interaction.replyAndFetch({
-      content: markdown(stringify({ ping: `${interaction.ping}ms` }), 'json'),
+      content: markdown(stringify({ ping: text }), 'json'),
       ephemeral: true,
     });
 
     const latency = `${reply.createdTimestamp - interaction.createdTimestamp}ms`;
 
     return interaction.editReply({
-      content: markdown(stringify({ ping: `${interaction.ping}ms`, latency }), 'json'),
+      content: markdown(stringify({ ping: text, latency }), 'json'),
       ephemeral: true,
     });
   },

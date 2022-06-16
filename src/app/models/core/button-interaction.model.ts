@@ -13,54 +13,36 @@ export interface IButtonInteraction {
   message: IMessage
 }
 
-export class YADBButtonInteractionBuilder {
-  constructor(
-    private buttonInteraction: ButtonInteraction,
-    private app: IApp,
-  ) {}
+export const YADBButtonInteractionFactory = async (
+  buttonInteraction: ButtonInteraction,
+  app: IApp,
+): Promise<IButtonInteraction> => {
+  const interaction = new YADBInteraction(buttonInteraction);
+  const member = buttonInteraction.member instanceof GuildMember
+    ? new YADBGuildMember(buttonInteraction.member) : null;
 
-  async build(): Promise<IButtonInteraction> {
-    const interaction = new YADBInteraction(this.buttonInteraction);
-
-    let member = null;
-    if (this.buttonInteraction.member instanceof GuildMember) {
-      member = new YADBGuildMember(this.buttonInteraction.member);
-    }
-
-    // Si el mensaje no viene de un Guild, significa que es un DM, por lo que
-    // hay que obtener el TextChannel a partir de su user.
-    let textChannel = null;
-    if (this.buttonInteraction.inGuild() && this.buttonInteraction.channel !== null) {
-      textChannel = new YADBTextChannel(this.buttonInteraction.channel);
-    } else {
-      textChannel = await this.fetchUserDMChannel();
-    }
-
-    // Si el mensaje es un DM, viene una instancia de API Message, por lo que
-    // hay que obtenerlo a partir del canal
-    let message = null;
-    if (this.buttonInteraction.message instanceof Message) {
-      message = new YADBMessage(this.buttonInteraction.message);
-    } else {
-      message = await textChannel.fetchMessage(this.buttonInteraction.message.id);
-    }
-
-    return {
-      app: this.app,
-      interaction,
-      textChannel,
-      message,
-      member,
-    };
-  }
-
-  private async fetchUserDMChannel(): Promise<ITextChannel> {
+  // Si el mensaje no viene de un Guild, significa que es un DM, por lo que
+  // hay que obtener el TextChannel a partir de su user.
+  const textChannel = buttonInteraction.inGuild() && buttonInteraction.channel !== null
+    ? new YADBTextChannel(buttonInteraction.channel)
     // Cuando se reinicia la aplicación, se pierde el dmChannel, por lo que si
     // un user quiere interactuar con un mensaje muy antiguo hace falta
     // primero llamar a createDM()
-    return new YADBTextChannel(
-      this.buttonInteraction.user.dmChannel
-      ?? await this.buttonInteraction.user.createDM(),
+    : new YADBTextChannel(
+      buttonInteraction.user.dmChannel ?? await buttonInteraction.user.createDM(),
     );
-  }
-}
+
+  // Si el mensaje es un DM, viene una instancia de APIMessage, por lo que
+  // hay que obtener el mensaje completo desde el channel
+  const message = buttonInteraction.message instanceof Message
+    ? new YADBMessage(buttonInteraction.message)
+    : await textChannel.fetchMessage(buttonInteraction.message.id);
+
+  return {
+    app,
+    interaction,
+    textChannel,
+    message,
+    member,
+  };
+};

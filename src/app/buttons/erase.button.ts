@@ -3,10 +3,11 @@ import { InternalBotError } from '../exceptions/internal-bot.error';
 import { IButtonHandler } from '../models/core/button-handler.model';
 import { IButtonInteraction } from '../models/core/button-interaction.model';
 
-export const deleteBtn: IButtonHandler = {
+// No puedo llamarlo 'delete' porque es palabra reservada :(
+export const erase: IButtonHandler = {
   get data(): MessageButton {
     return new MessageButton()
-      .setCustomId('delete')
+      .setCustomId('erase')
       .setLabel('Eliminar')
       .setStyle('DANGER')
       .setEmoji('🗑️');

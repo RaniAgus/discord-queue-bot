@@ -9,8 +9,8 @@ import { LayerEightError } from './app/exceptions/layer-eight.error';
 import { errorReplyContentForUser } from './app/replies/error.reply';
 import { IReplyMessage, YADBReplyMessage } from './app/models/discord/reply-message.model';
 import { getCurrentTime } from './app/utils/time';
-import { YADBButtonInteractionBuilder } from './app/models/core/button-interaction.model';
-import { YADBCommandInteractionBuilder } from './app/models/core/command-interaction.model';
+import { YADBButtonInteractionFactory } from './app/models/core/button-interaction.model';
+import { YADBCommandInteractionFactory } from './app/models/core/command-interaction.model';
 
 client.once('ready', async () => {
   const channel = await client.channels.fetch(env.LOG_CHANNEL_ID);
@@ -35,7 +35,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
   try {
     if (interaction.isButton()) {
       const handler = buttons.get(interaction.customId);
-      const bi = await new YADBButtonInteractionBuilder(interaction, app).build();
+      const bi = await YADBButtonInteractionFactory(interaction, app);
       if (!handler.hasPermissions(bi)) {
         throw new LayerEightError(
           `${bi.member?.nickname}, no contás con permisos suficientes para usar este botón.`,
@@ -45,7 +45,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
       await handler.handle(bi);
     } else if (interaction.isCommand()) {
       const handler = commands.get(interaction.commandName);
-      const ci = new YADBCommandInteractionBuilder(interaction, app).build();
+      const ci = YADBCommandInteractionFactory(interaction, app);
       if (!handler.hasPermissions(ci)) {
         throw new LayerEightError(
           `${ci.member?.nickname}, no contás con permisos suficientes para usar este comando.`,

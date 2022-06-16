@@ -1,7 +1,5 @@
 import { GuildMember } from 'discord.js';
-import { Time, parseTime } from '../../utils/time';
 import env from '../../environment';
-import { InternalBotError } from '../../exceptions/internal-bot.error';
 
 export interface IGuildMember {
   id: string
@@ -11,13 +9,9 @@ export interface IGuildMember {
   isAdmin: boolean
   isConnectedInVoiceChannel: boolean
   voiceChannelTag: string | null
-  queueArrival: Time
-  setArrival(queueArrival: Time): this
 }
 
 export class YADBGuildMember implements IGuildMember {
-  private _queueArrival: Time | null = null;
-
   constructor(private member: GuildMember) {}
 
   get id(): string {
@@ -48,26 +42,4 @@ export class YADBGuildMember implements IGuildMember {
     return this.isConnectedInVoiceChannel
       ? `<#${this.member.voice.channelId}>` : null;
   }
-
-  get queueArrival(): Time {
-    if (!this._queueArrival) {
-      throw new InternalBotError(`No se encontró a ${this.nickname} en ninguna fila.`);
-    }
-    return this._queueArrival;
-  }
-
-  setArrival(queueArrival: Time): this {
-    this._queueArrival = queueArrival;
-    return this;
-  }
-
-  toString(): string {
-    return `\`${this.queueArrival.format('HH:mm')}\` ${this.tag} ${this.voiceChannelTag ?? '--'}`;
-  }
-}
-
-export function parseMember(text: string): { id: string, queueArrival: Time } {
-  const [time, id] = text.split(/`| |<@|>/).filter((s) => s);
-
-  return { queueArrival: parseTime(time, 'HH:mm'), id };
 }

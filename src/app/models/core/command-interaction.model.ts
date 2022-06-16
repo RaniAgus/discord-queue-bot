@@ -13,26 +13,15 @@ export interface ICommandInteraction {
   params: ICommandParams
 }
 
-export class YADBCommandInteractionBuilder {
-  constructor(
-    private commandInteraction: CommandInteraction,
-    private app: IApp,
-  ) {}
-
-  build(): ICommandInteraction {
-    const interaction = new YADBInteraction(this.commandInteraction);
-    const params = new YADBCommandParams(this.commandInteraction.options);
-    const textChannel = this.commandInteraction.channel !== null
-      ? new YADBTextChannel(this.commandInteraction.channel) : null;
-    const member = this.commandInteraction.member instanceof GuildMember
-      ? new YADBGuildMember(this.commandInteraction.member) : null;
-
-    return {
-      app: this.app,
-      interaction,
-      params,
-      member,
-      textChannel,
-    };
-  }
-}
+export const YADBCommandInteractionFactory = (
+  commandInteraction: CommandInteraction,
+  app: IApp,
+): ICommandInteraction => ({
+  app,
+  interaction: new YADBInteraction(commandInteraction),
+  params: new YADBCommandParams(commandInteraction.options),
+  textChannel: commandInteraction.channel !== null
+    ? new YADBTextChannel(commandInteraction.channel) : null,
+  member: commandInteraction.member instanceof GuildMember
+    ? new YADBGuildMember(commandInteraction.member) : null,
+});

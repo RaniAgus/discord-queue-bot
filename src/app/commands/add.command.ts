@@ -3,6 +3,8 @@ import { InternalBotError } from '../exceptions/internal-bot.error';
 import { memberAddedReply } from '../replies/member-added.reply';
 import { ICommandHandler } from '../models/core/command-handler.model';
 import { ICommandInteraction } from '../models/core/command-interaction.model';
+import { YADBQueueMember } from '../models/queue/queue-user.model';
+import { getCurrentTime } from '../utils/time';
 
 export const add: ICommandHandler = {
   get data() {
@@ -30,13 +32,13 @@ export const add: ICommandHandler = {
 
     const message = await textChannel.fetchMessage(params.getString('queue-id'));
     const queue = await app.queues.get(message);
-    const member = params.getMember('member');
+    const queueMember = new YADBQueueMember(params.getMember('member'), getCurrentTime());
 
-    queue.add(member);
-    message.sendToThread(memberAddedReply({ queue, member }));
+    queue.add(queueMember);
+    message.sendToThread(memberAddedReply({ queue, queueMember }));
 
     return interaction.reply({
-      content: `Agregaste a ${member.tag} a la fila ${queue.name} con éxito.`,
+      content: `Agregaste a ${queueMember.member.tag} a la fila ${queue.name} con éxito.`,
       ephemeral: true,
     });
   },

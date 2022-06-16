@@ -108,13 +108,8 @@ export class YADBMessage implements IMessage {
 
   private get actions(): YADBCollection<MessageActionRowComponent> {
     const actions = new YADBCollection<MessageActionRowComponent>();
-    this.message.components.forEach((actionRow) => {
-      actionRow.components.forEach((action) => {
-        if (action.customId !== null) {
-          actions.set(action.customId, action);
-        }
-      });
-    });
+    this.message.components.forEach((actionRow) => actionRow.components
+      .forEach((action) => action.customId && actions.set(action.customId, action)));
 
     return actions;
   }

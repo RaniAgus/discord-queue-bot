@@ -1,8 +1,8 @@
 import { MessageButton, MessageEmbed } from 'discord.js';
 import { YADBCollection } from '../models/collection.model';
-import { parseMember, IGuildMember } from '../models/discord/guild-member.model';
 import { IMessage } from '../models/discord/guild-message.model';
 import { IReplyMessage, YADBReplyMessage } from '../models/discord/reply-message.model';
+import { IQueueMember, YADBQueueMember } from '../models/queue/queue-user.model';
 import { IQueue, YADBQueue } from '../models/queue/queue.model';
 
 const NO_USERS_LABEL = 'No hay nadie en la fila.';
@@ -32,7 +32,7 @@ export function queueReply({ queue, buttons, withAttachment }: TQueueReplyOption
     .setContent(queue.name)
     .addEmbed(embed)
     .addButtonsRow(
-      queue.isTerminated ? buttons.getMultiple('delete') : [
+      queue.isTerminated ? buttons.getMultiple('erase') : [
         buttons.get('next').setDisabled(queue.isTerminated),
         buttons.get('add').setDisabled(queue.isClosed),
         buttons.get('remove').setDisabled(queue.isTerminated),
@@ -44,19 +44,19 @@ export function queueReply({ queue, buttons, withAttachment }: TQueueReplyOption
     ? message.addAttachment('./assets/utn-logo.png', 'utn-logo.png') : message;
 }
 
-async function fetchQueueMembers(message: IMessage): Promise<IGuildMember[]> {
+const fetchQueueMembers = async (message: IMessage): Promise<IQueueMember[]> => {
   const memberList = message.getEmbedField(0).value.split('\n');
   if (memberList[0] === NO_USERS_LABEL) {
     return [];
   }
 
   return Promise.all(memberList.map(async (memberStr) => {
-    const { id, queueArrival } = parseMember(memberStr);
+    const { id, arrival } = YADBQueueMember.of(memberStr);
     const member = await message.fetchGuildMember(id);
 
-    return member.setArrival(queueArrival);
+    return new YADBQueueMember(member, arrival);
   }));
-}
+};
 
 export async function fetchQueue(message: IMessage): Promise<IQueue> {
   const members = await fetchQueueMembers(message);

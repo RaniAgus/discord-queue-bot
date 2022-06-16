@@ -21,7 +21,7 @@ export const next: IButtonHandler = {
     }
 
     const queue = await app.queues.get(message);
-    const member = queue.next();
+    const { member } = queue.next();
 
     return interaction.reply(queueNextReply({ buttons: app.buttons, member }));
   },

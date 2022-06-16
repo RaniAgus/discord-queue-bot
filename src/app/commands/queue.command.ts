@@ -22,12 +22,12 @@ export const queue: ICommandHandler = {
     const reply = await interaction.deferReply();
 
     await reply.createThread({ name });
-    const newQueue = new YADBQueue({ id: reply.id, name });
-    app.queues.put(newQueue, reply);
+    const createdQueue = new YADBQueue({ id: reply.id, name });
+    app.queues.put(createdQueue, reply);
 
     return interaction.editReply(queueReply({
       buttons: app.buttons,
-      queue: newQueue,
+      queue: createdQueue,
       withAttachment: true,
     }));
   },

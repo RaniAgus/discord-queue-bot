@@ -2,11 +2,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-function getenv(variable: string): string {
-  return process.env[variable] || (() => {
-    throw Error(`Falta configurar la variable de entorno ${variable}.`);
-  })();
-}
+const getenv = (variable: string): string => process.env[variable] || (() => {
+  throw Error(`Falta configurar la variable de entorno ${variable}.`);
+})();
 
 export default {
   DISCORD_TOKEN: getenv('DISCORD_TOKEN'),

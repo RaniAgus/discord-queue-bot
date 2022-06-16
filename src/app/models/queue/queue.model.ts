@@ -1,23 +1,24 @@
 import { Subject, Subscription } from 'rxjs';
 import { LayerEightError } from '../../exceptions/layer-eight.error';
 import { IGuildMember } from '../discord/guild-member.model';
-import { getCurrentTime } from '../../utils/time';
+import { IQueueMember } from './queue-user.model';
 
 export interface IQueueOptions {
   id: string,
   name: string,
-  members?: IGuildMember[],
+  members?: IQueueMember[],
   isClosed?: boolean
 }
+
 export interface IQueue {
   id: string
   name: string
   isClosed: boolean
   isTerminated: boolean
   members: string[]
-  add: (member: IGuildMember) => void
-  remove: (member: IGuildMember) => void
-  next: () => IGuildMember
+  add: (queueMember: IQueueMember) => void
+  remove: (member: IGuildMember) => IQueueMember
+  next: () => IQueueMember
   close: () => void
   listenChanges: (subscriptionCallback: (s: Subject<IQueue>) => Subscription) => Subscription
 }
@@ -25,7 +26,7 @@ export interface IQueue {
 export class YADBQueue implements IQueue {
   private $changed: Subject<IQueue> = new Subject<IQueue>();
 
-  private _members: IGuildMember[];
+  private _members: IQueueMember[];
 
   id: string;
 
@@ -52,16 +53,15 @@ export class YADBQueue implements IQueue {
     return subscriptionCallback(this.$changed);
   }
 
-  add(member: IGuildMember): void {
-    if (this._indexOf(member.id) >= 0) {
-      throw new LayerEightError(`${member.nickname}, ya estás en la fila ${this.name}.`);
+  add(queueMember: IQueueMember): void {
+    if (this._indexOf(queueMember.member.id) >= 0) {
+      throw new LayerEightError(`${queueMember.member.nickname}, ya estás en la fila ${this.name}.`);
     }
-    this._members.push(member);
-    member.setArrival(getCurrentTime());
+    this._members.push(queueMember);
     this.$changed.next(this);
   }
 
-  remove({ id, nickname }: IGuildMember): IGuildMember {
+  remove({ id, nickname }: IGuildMember): IQueueMember {
     const index = this._indexOf(id);
     if (index < 0) {
       throw new LayerEightError(`${nickname}, aún no estás en la fila ${this.name}.`);
@@ -72,7 +72,7 @@ export class YADBQueue implements IQueue {
     return member;
   }
 
-  next(): IGuildMember {
+  next(): IQueueMember {
     const next = this._members.shift();
     if (next === undefined) {
       throw new LayerEightError(`No hay nadie esperando en la fila ${this.name}.`);
@@ -88,6 +88,6 @@ export class YADBQueue implements IQueue {
   }
 
   private _indexOf(id: string): number {
-    return this._members.findIndex((m) => m.id === id);
+    return this._members.findIndex((m) => m.member.id === id);
   }
 }
