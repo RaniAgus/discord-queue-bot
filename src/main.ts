@@ -19,7 +19,6 @@ client.once('ready', async () => {
   }
 
   logger.setChannel(channel);
-  client.user?.setActivity('Finite State Machine', { type: 'PLAYING' });
   logger.log(
     `##### [${getCurrentTime().format('DD/MM/YY hh:mm:ss')}] `
     + `¡Iniciado como "${client.user?.username}"! #####`,
