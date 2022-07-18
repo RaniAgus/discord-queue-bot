@@ -1,8 +1,13 @@
 import {
-  MessageEmbed, MessageActionRow, MessageAttachment, MessageButton,
+  MessageEmbed,
+  MessageActionRow,
+  MessageAttachment,
+  MessageButton,
+  MessageSelectMenu,
+  MessageActionRowComponentResolvable,
 } from 'discord.js';
 
-export interface IReplyMessage {
+export interface BotReplyMessage {
   content?: string | null;
   ephemeral?: boolean;
   embeds?: MessageEmbed[];
@@ -10,18 +15,18 @@ export interface IReplyMessage {
   files?: MessageAttachment[];
 }
 
-export class YADBReplyMessage implements IReplyMessage {
+export class BotReplyMessageBuilder implements BotReplyMessage {
   content?: string | null;
 
   ephemeral?: boolean;
 
-  embeds: MessageEmbed[] = [];
+  embeds: MessageEmbed[];
 
   components: MessageActionRow[];
 
   files: MessageAttachment[];
 
-  public constructor(options?: IReplyMessage) {
+  constructor(options?: BotReplyMessage) {
     this.content = options?.content;
     this.ephemeral = options?.ephemeral;
     this.embeds = options?.embeds ?? [];
@@ -29,28 +34,34 @@ export class YADBReplyMessage implements IReplyMessage {
     this.files = options?.files ?? [];
   }
 
-  public setContent(content: string): this {
+  setContent(content: string): this {
     this.content = content.length > 0 ? content : null;
     return this;
   }
 
-  public setEphemeral(ephemeral: boolean): this {
+  setEphemeral(ephemeral: boolean): this {
     this.ephemeral = ephemeral;
     return this;
   }
 
-  public addEmbed(embed: MessageEmbed): this {
+  addEmbed(embed: MessageEmbed): this {
     this.embeds.push(embed);
     return this;
   }
 
-  public addButtonsRow(buttons: MessageButton[]): this {
-    this.components.push(new MessageActionRow().addComponents(buttons));
+  addButtonsRow(buttons: MessageButton[]): this {
+    this.addComponents(buttons);
     return this;
   }
 
-  public addAttachment(attachment: string, name?: string): this {
-    this.files.push(new MessageAttachment(attachment, name));
+  addSelectMenuRow(selects: MessageSelectMenu[]): this {
+    this.addComponents(selects);
     return this;
+  }
+
+  private addComponents(components: MessageActionRowComponentResolvable[]) {
+    if (components.length > 0) {
+      this.components.push(new MessageActionRow().addComponents(components));
+    }
   }
 }

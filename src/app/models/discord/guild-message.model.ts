@@ -10,25 +10,11 @@ import {
   ThreadChannel,
 } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
-import { YADBCollection } from '../collection.model';
-import { IGuildMember, YADBGuildMember } from './guild-member.model';
-import { IReplyMessage } from './reply-message.model';
+import { Dictionary } from '../collection.model';
+import { BotGuildMember } from './guild-member.model';
+import { BotReplyMessage } from './reply-message.model';
 
-export interface IMessage {
-  id: string
-  createdTimestamp: number
-  content: string
-  mentionedMembers: string[]
-  createThread: (options: StartThreadOptions) => Promise<ThreadChannel>
-  sendToThread: (message: IReplyMessage) => Promise<Message<boolean>>
-  edit: (reply: IReplyMessage) => Promise<IMessage>
-  getEmbedField: (index: number) => EmbedField | APIEmbedField
-  fetchGuildMember: (id: string) => Promise<IGuildMember>
-  isActionDisabled: (customId: string) => boolean
-  delete: () => Promise<Message<boolean>>
-}
-
-export class YADBMessage implements IMessage {
+export class BotMessage {
   constructor(private message: Message<boolean>) {}
 
   get id(): string {
@@ -51,28 +37,32 @@ export class YADBMessage implements IMessage {
     return this.message.startThread(options);
   }
 
-  sendToThread(message: IReplyMessage): Promise<Message<boolean>> {
+  sendToThread(message: BotReplyMessage): Promise<Message<boolean>> {
     return this.thread.send(message);
   }
 
-  async edit(reply: IReplyMessage): Promise<IMessage> {
-    return this.message.edit(reply).then((m) => new YADBMessage(m));
+  async edit(reply: BotReplyMessage): Promise<BotMessage> {
+    return this.message.edit(reply).then((m) => new BotMessage(m));
   }
 
-  getEmbedField(index: number): EmbedField | APIEmbedField {
-    if (!this.embed.fields || !this.embed.fields[index]) {
-      throw new InternalBotError(`No se encontró el campo nro. ${index} del embed del mensaje #${this.id}.`);
+  getEmbedAuthor(): string {
+    return this.embed.author?.name ?? '';
+  }
+
+  getEmbedFields(): EmbedField[] | APIEmbedField[] {
+    if (!this.embed.fields || this.embed.fields.length === 0) {
+      throw new InternalBotError('El mensaje no tiene ningún contenido embebido.');
     }
-    return this.embed.fields[index];
+    return this.embed.fields;
   }
 
-  async fetchGuildMember(id: string): Promise<IGuildMember> {
+  async fetchGuildMember(id: string): Promise<BotGuildMember> {
     let member = this.guild.members.cache.get(id);
     member ??= await this.guild.members.fetch(id);
     if (!member) {
       throw new InternalBotError(`No se pudo encontrar a #${id} en el servidor #${this.guild.id}.`);
     }
-    return new YADBGuildMember(member);
+    return new BotGuildMember(member);
   }
 
   isActionDisabled(customId: string): boolean {
@@ -106,8 +96,8 @@ export class YADBMessage implements IMessage {
     return embed;
   }
 
-  private get actions(): YADBCollection<MessageActionRowComponent> {
-    const actions = new YADBCollection<MessageActionRowComponent>();
+  private get actions(): Dictionary<MessageActionRowComponent> {
+    const actions = new Dictionary<MessageActionRowComponent>();
     this.message.components.forEach((actionRow) => actionRow.components
       .forEach((action) => action.customId && actions.set(action.customId, action)));
 

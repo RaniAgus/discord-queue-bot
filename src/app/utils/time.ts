@@ -2,7 +2,7 @@ import dayjs, { Dayjs, OptionType } from 'dayjs';
 import customParseFormatPlugin from 'dayjs/plugin/customParseFormat';
 import durationPlugin from 'dayjs/plugin/duration';
 import utcPlugin from 'dayjs/plugin/utc';
-import environment from '../environment';
+import { env } from '../environment';
 
 dayjs.extend(customParseFormatPlugin);
 dayjs.extend(durationPlugin);
@@ -22,10 +22,13 @@ export type Duration = {
   weeks?: number
 };
 
-export const getCurrentTime = (): Time => dayjs().utcOffset(environment.UTC_OFFSET);
+export const getCurrentTime = (): Time => dayjs().utcOffset(env.UTC_OFFSET);
 
-export const parseTime = (value: string, format: OptionType): Time => dayjs(value, format)
-  .utcOffset(environment.UTC_OFFSET, true);
+export const parseTime = (
+  value: string,
+  format: OptionType,
+): Time => dayjs(value, format).utcOffset(env.UTC_OFFSET, true);
 
-export const asMilliseconds = (duration: Duration): number => dayjs.duration(duration)
-  .asMilliseconds();
+export const asMilliseconds = (
+  duration: Duration,
+): number => dayjs.duration(duration).asMilliseconds();

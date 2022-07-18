@@ -1,27 +1,30 @@
 import { CommandInteraction, GuildMember } from 'discord.js';
-import { IApp } from './app.model';
-import { IInteraction, YADBInteraction } from '../discord/interaction.model';
-import { ICommandParams, YADBCommandParams } from './command-params.model';
-import { ITextChannel, YADBTextChannel } from '../discord/text-channel.model';
-import { IGuildMember, YADBGuildMember } from '../discord/guild-member.model';
+import { App } from './app.model';
+import { BotInteraction } from '../discord/interaction.model';
+import { BotCommandParams } from './command-params.model';
+import { BotTextChannel } from '../discord/text-channel.model';
+import { BotGuildMember } from '../discord/guild-member.model';
+import { BotBaseInteraction } from './base-interaction.model';
 
-export interface ICommandInteraction {
-  app: IApp
-  interaction: IInteraction
-  textChannel: ITextChannel | null
-  member: IGuildMember | null
-  params: ICommandParams
+export class BotCommandInteraction implements BotBaseInteraction {
+  constructor(
+    public app: App,
+    public interaction: BotInteraction,
+    public member: BotGuildMember | null,
+    public textChannel: BotTextChannel | null,
+    public params: BotCommandParams,
+  ) {}
+
+  static of = (
+    commandInteraction: CommandInteraction,
+    app: App,
+  ): BotCommandInteraction => ({
+    app,
+    interaction: new BotInteraction(commandInteraction),
+    params: new BotCommandParams(commandInteraction.options),
+    member: commandInteraction.member instanceof GuildMember
+      ? new BotGuildMember(commandInteraction.member) : null,
+    textChannel: commandInteraction.channel !== null
+      ? new BotTextChannel(commandInteraction.channel) : null,
+  });
 }
-
-export const YADBCommandInteractionFactory = (
-  commandInteraction: CommandInteraction,
-  app: IApp,
-): ICommandInteraction => ({
-  app,
-  interaction: new YADBInteraction(commandInteraction),
-  params: new YADBCommandParams(commandInteraction.options),
-  textChannel: commandInteraction.channel !== null
-    ? new YADBTextChannel(commandInteraction.channel) : null,
-  member: commandInteraction.member instanceof GuildMember
-    ? new YADBGuildMember(commandInteraction.member) : null,
-});

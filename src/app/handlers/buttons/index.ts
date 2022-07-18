@@ -1,16 +1,18 @@
 import { accept } from './accept.button';
-import { add } from './add.button';
+import { addUser } from './add-user.button';
+import { addGroup } from './add-group.button';
 import { close } from './close.button';
 import { erase } from './erase.button';
 import { mentionUser } from './mention-user.button';
 import { next } from './next.button';
 import { remove } from './remove.button';
-import { YADBCollection } from '../models/collection.model';
-import { IButtonHandler } from '../models/core/button-handler.model';
+import { Dictionary } from '../../models/collection.model';
+import { BotButtonHandler } from '../../models/core/button-handler.model';
 
-export const buttons = new YADBCollection<IButtonHandler>({
+export const buttons = new Dictionary<BotButtonHandler>({
   accept,
-  add,
+  addUser,
+  addGroup,
   close,
   erase,
   mentionUser,

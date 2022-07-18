@@ -3,16 +3,9 @@ import {
   VoiceChannel, Role, CommandInteractionOptionResolver, GuildMember,
 } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
-import { IGuildMember, YADBGuildMember } from '../discord/guild-member.model';
+import { BotGuildMember } from '../discord/guild-member.model';
 
-export interface ICommandParams {
-  getString: (key: string) => string
-  getVoice: (key: string) => VoiceChannel
-  getRole: (key: string) => Role | APIRole | null
-  getMember: (key: string) => IGuildMember
-}
-
-export class YADBCommandParams {
+export class BotCommandParams {
   constructor(private resolver: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>) {}
 
   getString(key: string): string {
@@ -38,7 +31,7 @@ export class YADBCommandParams {
     return this.resolver.getRole(key) || null;
   }
 
-  getMember(key: string): IGuildMember {
+  getMember(key: string): BotGuildMember {
     const member = this.resolver.getMember(key);
     if (member === null) {
       throw new InternalBotError(`Falta parámetro ${key}.`);
@@ -46,6 +39,6 @@ export class YADBCommandParams {
     if (!(member instanceof GuildMember)) {
       throw new InternalBotError(`Ocurrió un error al obtener el parámetro ${key}.`);
     }
-    return new YADBGuildMember(member);
+    return new BotGuildMember(member);
   }
 }

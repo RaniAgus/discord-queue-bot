@@ -1,17 +1,9 @@
 import { GuildMember } from 'discord.js';
-import env from '../../environment';
+import { BotVoiceChannel } from './voice-channel.model';
+import { env } from '../../environment';
+import { LayerEightError } from '../../exceptions/layer-eight.error';
 
-export interface IGuildMember {
-  id: string
-  tag: string
-  nickname: string
-  avatarUrl: string
-  isAdmin: boolean
-  isConnectedInVoiceChannel: boolean
-  voiceChannelTag: string | null
-}
-
-export class YADBGuildMember implements IGuildMember {
+export class BotGuildMember {
   constructor(private member: GuildMember) {}
 
   get id(): string {
@@ -41,5 +33,12 @@ export class YADBGuildMember implements IGuildMember {
   get voiceChannelTag(): string | null {
     return this.isConnectedInVoiceChannel
       ? `<#${this.member.voice.channelId}>` : null;
+  }
+
+  get voiceChannel(): BotVoiceChannel {
+    if (!this.member.voice.channel) {
+      throw new LayerEightError(`${this.nickname}, ¡no te has conectado a ningún canal de voz!`);
+    }
+    return new BotVoiceChannel(this.member.voice.channel);
   }
 }

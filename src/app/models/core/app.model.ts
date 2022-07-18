@@ -1,13 +1,19 @@
 import { REST } from '@discordjs/rest';
-import { Client, MessageButton } from 'discord.js';
-import { YADBCollection } from '../collection.model';
-import { ILogger } from '../logger.model';
-import { IQueueRepository } from '../queue/queue-repository.model';
+import {
+  Client, MessageButton, MessageSelectMenu, Modal,
+} from 'discord.js';
+import { Dictionary } from '../collection.model';
+import { LogChannel } from '../logger.model';
+import { GroupService } from '../queue/group.service';
+import { QueueService } from '../queue/queue.service';
 
-export interface IApp {
-  logger: ILogger
+export interface App {
+  logger: LogChannel
   client: Client
   rest: REST
-  queues: IQueueRepository
-  buttons: YADBCollection<MessageButton>
+  queueService: QueueService
+  groupService: GroupService
+  buttons: Dictionary<MessageButton>
+  modals: Dictionary<Modal>
+  selects: Dictionary<MessageSelectMenu>
 }

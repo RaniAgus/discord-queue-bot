@@ -1,85 +1,53 @@
-import { Subject, Subscription } from 'rxjs';
+import { EmbedFooterData } from '@discordjs/builders';
+import { EmbedField, MessageButton } from 'discord.js';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { LayerEightError } from '../../exceptions/layer-eight.error';
-import { IGuildMember } from '../discord/guild-member.model';
-import { IQueueMember } from './queue-user.model';
+import { Dictionary } from '../collection.model';
+import { BotGuildMember } from '../discord/guild-member.model';
+import { BotReplyMessage } from '../discord/reply-message.model';
+import { QueueMember } from './queue-member.model';
 
-export interface IQueueOptions {
-  id: string,
-  name: string,
-  members?: IQueueMember[],
-  isClosed?: boolean
-}
+export type QueueType = 'SUPPORT' | 'LABORATORY';
 
-export interface IQueue {
-  id: string
-  name: string
-  isClosed: boolean
-  isTerminated: boolean
-  members: string[]
-  add: (queueMember: IQueueMember) => void
-  remove: (member: IGuildMember) => IQueueMember
-  next: () => IQueueMember
-  close: () => void
-  listenChanges: (subscriptionCallback: (s: Subject<IQueue>) => Subscription) => Subscription
-}
-
-export class YADBQueue implements IQueue {
-  private $changed: Subject<IQueue> = new Subject<IQueue>();
-
-  private _members: IQueueMember[];
-
-  id: string;
-
-  name: string;
-
-  isClosed: boolean;
+export abstract class Queue {
+  private $changed: Subject<Queue> = new Subject();
 
   get isTerminated(): boolean {
-    return this.isClosed && this._members.length === 0;
+    return this.isClosed && this.isEmpty();
   }
 
-  get members(): string[] {
-    return this._members.map((member) => member.toString());
-  }
+  constructor(
+    public id: string,
+    public name: string,
+    protected isClosed = false,
+  ) {}
 
-  constructor(options: IQueueOptions) {
-    this.id = options.id;
-    this.name = options.name;
-    this.isClosed = !!options.isClosed;
-    this._members = options.members ?? [];
-  }
-
-  listenChanges(subscriptionCallback: (s: Subject<IQueue>) => Subscription): Subscription {
-    return subscriptionCallback(this.$changed);
-  }
-
-  add(queueMember: IQueueMember): void {
-    if (this._indexOf(queueMember.member.id) >= 0) {
+  add(queueMember: QueueMember): void {
+    if (this.hasMember(queueMember.member)) {
       throw new LayerEightError(`${queueMember.member.nickname}, ya estás en la fila ${this.name}.`);
     }
-    this._members.push(queueMember);
+    this.addMember(queueMember);
     this.$changed.next(this);
   }
 
-  remove({ id, nickname }: IGuildMember): IQueueMember {
-    const index = this._indexOf(id);
-    if (index < 0) {
-      throw new LayerEightError(`${nickname}, aún no estás en la fila ${this.name}.`);
+  remove(member: BotGuildMember): QueueMember {
+    if (!this.hasMember(member)) {
+      throw new LayerEightError(`${member.nickname}, aún no estás en la fila ${this.name}.`);
     }
-    const [member] = this._members.splice(index, 1);
+    const queueMember = this.removeMember(member);
     this.$changed.next(this);
 
-    return member;
+    return queueMember;
   }
 
-  next(): IQueueMember {
-    const next = this._members.shift();
-    if (next === undefined) {
+  next(buttons: Dictionary<MessageButton>): BotReplyMessage {
+    if (this.isEmpty()) {
       throw new LayerEightError(`No hay nadie esperando en la fila ${this.name}.`);
     }
+    const next = this.nextMembers();
     this.$changed.next(this);
 
-    return next;
+    return this.nextMessage(next, buttons);
   }
 
   close(): void {
@@ -87,7 +55,28 @@ export class YADBQueue implements IQueue {
     this.$changed.next(this);
   }
 
-  private _indexOf(id: string): number {
-    return this._members.findIndex((m) => m.member.id === id);
+  listenChanges(mapper: (s: Observable<Queue>) => Subscription): Subscription {
+    return mapper(this.$changed);
   }
+
+  getButtonsRow(buttons: Dictionary<MessageButton>): MessageButton[] {
+    return this.isTerminated ? buttons.getMultiple('erase') : [
+      buttons.get('next').setDisabled(this.isTerminated),
+      buttons.get(this.getAddButtonId()).setDisabled(this.isClosed),
+      buttons.get('remove').setDisabled(this.isTerminated),
+      buttons.get('close').setDisabled(this.isClosed),
+    ];
+  }
+
+  abstract getType(): QueueType;
+  abstract getFields(): EmbedField[];
+  abstract getFooter(): EmbedFooterData;
+  protected abstract getAddButtonId(): string;
+  protected abstract isEmpty(): boolean;
+  protected abstract hasMember(member: BotGuildMember): boolean;
+  protected abstract addMember(member: QueueMember): void;
+  protected abstract removeMember(member: BotGuildMember): QueueMember;
+  protected abstract nextMembers(): QueueMember[];
+  protected abstract nextMessage(
+    next: QueueMember[], buttons: Dictionary<MessageButton>): BotReplyMessage;
 }

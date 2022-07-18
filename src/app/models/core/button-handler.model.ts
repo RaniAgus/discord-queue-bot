@@ -1,8 +1,9 @@
 import { MessageButton } from 'discord.js';
-import { IButtonInteraction } from './button-interaction.model';
+import { BotButtonInteraction } from './button-interaction.model';
+import { BotBaseHandler } from './base-handler.model';
 
-export interface IButtonHandler {
+export interface BotButtonHandler extends BotBaseHandler<MessageButton, BotButtonInteraction> {
   data: MessageButton,
-  hasPermissions(interaction: IButtonInteraction): boolean
-  handle(interaction: IButtonInteraction): Promise<void>
+  hasPermissions(interaction: BotButtonInteraction): boolean
+  handle(interaction: BotButtonInteraction): Promise<void>
 }

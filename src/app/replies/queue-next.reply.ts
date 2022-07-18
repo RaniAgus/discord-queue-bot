@@ -1,20 +1,20 @@
 import { MessageButton } from 'discord.js';
-import { YADBCollection } from '../models/collection.model';
-import { IGuildMember } from '../models/discord/guild-member.model';
-import { IReplyMessage, YADBReplyMessage } from '../models/discord/reply-message.model';
+import { Dictionary } from '../models/collection.model';
+import { BotGuildMember } from '../models/discord/guild-member.model';
+import { BotReplyMessage, BotReplyMessageBuilder } from '../models/discord/reply-message.model';
 
-type TQueueNextReplyOptions = {
-  buttons: YADBCollection<MessageButton>
-  member: IGuildMember
+type QueueNextReplyOptions = {
+  buttons: Dictionary<MessageButton>
+  member: BotGuildMember
 };
 
-export function queueNextReply({ member, buttons }: TQueueNextReplyOptions): IReplyMessage {
+export function queueNextReply({ member, buttons }: QueueNextReplyOptions): BotReplyMessage {
   return member.isConnectedInVoiceChannel
-    ? new YADBReplyMessage()
-      .setContent(`${member.tag} es el siguiente. Está esperándote en el canal ${member.voiceChannelTag}.`)
+    ? new BotReplyMessageBuilder()
+      .setContent(`Sigue ${member.tag}. Está esperándote en el canal ${member.voiceChannelTag}.`)
       .setEphemeral(true)
-    : new YADBReplyMessage()
-      .setContent(`${member.tag} es el siguiente. No se encuentra en ningún canal.`)
+    : new BotReplyMessageBuilder()
+      .setContent(`Sigue ${member.tag}. No se encuentra en ningún canal.`)
       .addButtonsRow(buttons.getMultiple('mentionUser'))
       .setEphemeral(true);
 }

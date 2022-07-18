@@ -1,20 +1,13 @@
-import { Message, TextBasedChannels } from 'discord.js';
+import { Message, TextBasedChannel } from 'discord.js';
 import { errorReplyContentForLog } from '../replies/error.reply';
 import { chunkString, markdown, stringify } from '../utils/string';
 
 const DISCORD_MAX_MSG_LENGTH = 2000;
 
-export interface ILogger {
-  setChannel(channel: TextBasedChannels): void
-  log(text: string, language?: string): Promise<Message<boolean>[]>
-  logError(error: unknown): Promise<Message<boolean>[]>
-  logJSON(object: unknown): Promise<Message<boolean>[]>
-}
+export class LogChannel {
+  private logChannel: TextBasedChannel | null = null;
 
-export class YADBLogger implements ILogger {
-  private logChannel?: TextBasedChannels;
-
-  setChannel(channel: TextBasedChannels): void {
+  setChannel(channel: TextBasedChannel): void {
     this.logChannel = channel;
   }
 
@@ -22,11 +15,12 @@ export class YADBLogger implements ILogger {
     const result: Promise<Message<boolean>>[] = [];
     const maxlen = DISCORD_MAX_MSG_LENGTH - language.length - 8;
 
+    if (this.logChannel === null) {
+      throw Error('El canal logger no está definido.');
+    }
+
     chunkString(text, maxlen).forEach((chunk) => {
-      if (!this.logChannel) {
-        throw Error('El canal logger no está definido.');
-      }
-      this.logChannel.send(markdown(chunk, language));
+      this.logChannel?.send(markdown(chunk, language));
     });
 
     return Promise.all(result);

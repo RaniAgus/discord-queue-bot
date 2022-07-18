@@ -7,22 +7,23 @@
     "curly": 1,
     "no-await-in-loop": 1,
     "no-template-curly-in-string": 1,
+    "no-underscore-dangle": "off",
     "no-unused-vars": "off",
+    "class-methods-use-this": "off",
+    "import/prefer-default-export": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn", {
         "argsIgnorePattern": "^_$"
       }
-    ],
-    "import/prefer-default-export": "off",
-    "no-underscore-dangle": "off"
+    ]
   },
   "plugins": [
     "@typescript-eslint"
   ],
   "extends": [
+    "eslint:recommended",
     "airbnb-base",
     "airbnb-typescript/base",
-    "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],

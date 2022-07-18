@@ -1,15 +1,15 @@
 import { ToAPIApplicationCommandOptions } from '@discordjs/builders';
-import { ICommandInteraction } from './command-interaction.model';
+import { BotCommandInteraction } from './command-interaction.model';
+import { BotBaseHandler } from './base-handler.model';
 
-export type Command = {
+export type BotCommand = {
   name: string;
   description: string;
   options: ToAPIApplicationCommandOptions[];
-  defaultPermission: boolean | undefined;
 };
 
-export interface ICommandHandler {
-  data: Command
-  hasPermissions(interaction: ICommandInteraction): boolean
-  handle(interaction: ICommandInteraction): Promise<void>
+export interface BotCommandHandler extends BotBaseHandler<BotCommand, BotCommandInteraction> {
+  data: BotCommand
+  hasPermissions(interaction: BotCommandInteraction): boolean
+  handle(interaction: BotCommandInteraction): Promise<void>
 }

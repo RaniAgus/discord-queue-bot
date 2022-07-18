@@ -1,20 +1,26 @@
 import { MessageEmbed } from 'discord.js';
-import { IReplyMessage, YADBReplyMessage } from '../models/discord/reply-message.model';
-import { IQueueMember } from '../models/queue/queue-user.model';
-import { IQueue } from '../models/queue/queue.model';
+import { BotReplyMessage, BotReplyMessageBuilder } from '../models/discord/reply-message.model';
+import { QueueMember } from '../models/queue/queue-member.model';
+import { Queue } from '../models/queue/queue.model';
 
-type TMemberAddedReplyOptions = {
-  queueMember: IQueueMember
-  queue: IQueue
+type MemberAddedReplyOptions = {
+  queueMember: QueueMember
+  queue: Queue
 };
 
-export function memberAddedReply(
-  { queue, queueMember: { member, arrival } }: TMemberAddedReplyOptions,
-): IReplyMessage {
-  return new YADBReplyMessage().addEmbed(
+export function memberAddedReply({ queueMember, queue }: MemberAddedReplyOptions): BotReplyMessage {
+  return new BotReplyMessageBuilder().addEmbed(
     new MessageEmbed()
-      .setAuthor('▶️ Usuario agregado', member.avatarUrl)
-      .setDescription(`${member.nickname} ingresó a la fila "${queue.name}" a las ${arrival.format('HH:mm:ss')}`)
-      .setFooter(`Queue ID: ${queue.id} • User ID: ${member.id}`),
+      .setAuthor({
+        name: '▶️ Usuario agregado',
+        iconURL: queueMember.member.avatarUrl,
+      })
+      .setDescription(
+        `${queueMember.member.nickname} ingresó a la fila "${queue.name}" `
+        + `a las ${queueMember.arrival.format('HH:mm:ss')}`,
+      )
+      .setFooter({
+        text: `Queue ID: ${queue.id} • User ID: ${queueMember.member.id}`,
+      }),
   );
 }

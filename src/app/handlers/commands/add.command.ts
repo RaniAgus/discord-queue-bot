@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { InternalBotError } from '../exceptions/internal-bot.error';
-import { memberAddedReply } from '../replies/member-added.reply';
-import { ICommandHandler } from '../models/core/command-handler.model';
-import { ICommandInteraction } from '../models/core/command-interaction.model';
-import { YADBQueueMember } from '../models/queue/queue-user.model';
-import { getCurrentTime } from '../utils/time';
+import { InternalBotError } from '../../exceptions/internal-bot.error';
+import { memberAddedReply } from '../../replies/member-added.reply';
+import { BotCommandHandler } from '../../models/core/command-handler.model';
+import { BotCommandInteraction } from '../../models/core/command-interaction.model';
+import { QueueMember } from '../../models/queue/queue-member.model';
+import { getCurrentTime } from '../../utils/time';
 
-export const add: ICommandHandler = {
+export const add: BotCommandHandler = {
   get data() {
     return new SlashCommandBuilder()
       .setName('add')
@@ -20,19 +20,19 @@ export const add: ICommandHandler = {
         .setDescription('A quién agregar a la fila')
         .setRequired(true));
   },
-  hasPermissions({ member }: ICommandInteraction): boolean {
+  hasPermissions({ member }: BotCommandInteraction): boolean {
     return member !== null && member.isAdmin;
   },
   async handle({
     interaction, textChannel, params, app,
-  }: ICommandInteraction): Promise<void> {
+  }: BotCommandInteraction): Promise<void> {
     if (textChannel === null) {
       throw new InternalBotError('Ocurrió un error al intentar agregarle a la fila.');
     }
 
     const message = await textChannel.fetchMessage(params.getString('queue-id'));
-    const queue = await app.queues.get(message);
-    const queueMember = new YADBQueueMember(params.getMember('member'), getCurrentTime());
+    const queue = await app.queueService.get(message);
+    const queueMember = new QueueMember(params.getMember('member'), getCurrentTime());
 
     queue.add(queueMember);
     message.sendToThread(memberAddedReply({ queue, queueMember }));

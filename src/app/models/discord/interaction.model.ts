@@ -1,21 +1,14 @@
-import { ButtonInteraction, CommandInteraction, Message } from 'discord.js';
+import {
+  ButtonInteraction, CommandInteraction, Message, Modal, ModalSubmitInteraction,
+} from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
-import { IMessage, YADBMessage } from './guild-message.model';
-import { IReplyMessage } from './reply-message.model';
+import { BotMessage } from './guild-message.model';
+import { BotReplyMessage } from './reply-message.model';
 
-export interface IInteraction {
-  ping: number
-  createdTimestamp: number
-  isInGuild: boolean
-  deferReply(): Promise<IMessage>
-  reply(reply: IReplyMessage): Promise<void>
-  replyAndFetch(reply: IReplyMessage): Promise<IMessage>
-  editReply(reply: IReplyMessage): Promise<void>
-  followUp(reply: IReplyMessage): Promise<void>
-}
-
-export class YADBInteraction implements IInteraction {
-  constructor(private interaction: ButtonInteraction | CommandInteraction) {}
+export class BotInteraction {
+  constructor(
+    private interaction: ButtonInteraction | CommandInteraction | ModalSubmitInteraction,
+  ) {}
 
   get isInGuild(): boolean {
     return this.interaction.inGuild();
@@ -29,31 +22,38 @@ export class YADBInteraction implements IInteraction {
     return this.interaction.createdTimestamp;
   }
 
-  async deferReply(): Promise<IMessage> {
+  async deferReply(): Promise<BotMessage> {
     const message = await this.interaction.deferReply({ fetchReply: true });
     if (!(message instanceof Message)) {
       throw new InternalBotError('Ocurrió un error al diferir la respuesta.');
     }
-    return new YADBMessage(message);
+    return new BotMessage(message);
   }
 
-  async reply(reply: IReplyMessage): Promise<void> {
+  async reply(reply: BotReplyMessage): Promise<void> {
     return this.interaction.reply(reply);
   }
 
-  async replyAndFetch(reply: IReplyMessage): Promise<IMessage> {
+  async replyAndFetch(reply: BotReplyMessage): Promise<BotMessage> {
     const message = await this.interaction.reply({ ...reply, fetchReply: true });
     if (!(message instanceof Message)) {
       throw new InternalBotError('Ocurrió un error al obtener la respuesta enviada.');
     }
-    return new YADBMessage(message);
+    return new BotMessage(message);
   }
 
-  async editReply(reply: IReplyMessage): Promise<void> {
+  async editReply(reply: BotReplyMessage): Promise<void> {
     await this.interaction.editReply(reply);
   }
 
-  async followUp(reply: IReplyMessage): Promise<void> {
+  async followUp(reply: BotReplyMessage): Promise<void> {
     await this.interaction.followUp(reply);
+  }
+
+  async showModal(modal: Modal): Promise<void> {
+    if (this.interaction instanceof ModalSubmitInteraction) {
+      throw new InternalBotError('¡No puede mostrarse un modal sobre otro!');
+    }
+    return this.interaction.showModal(modal);
   }
 }

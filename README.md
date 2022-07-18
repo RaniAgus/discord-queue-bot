@@ -35,8 +35,6 @@ This project requires Node.js v16.6.0 or higher.
 - `LOG_CHANNEL_ID`: Discord Text Channel ID for redirecting error output
 - `ADMIN_ROLES`: Role IDs that are allowed to use admin interactions, separated
 by pipes (eg: `id1|id2|...|idN`)
-- `UTC_OFFSET`: Timezone offset from UTC. If not set, it defaults to `'-03:00'`
-(Buenos Aires, Argentina).
 
 2. Install dependencies: `npm install`
 
