@@ -32,27 +32,14 @@ export class SupportQueue extends Queue {
       name: 'En espera',
       value: this.members.map((member) => member.toRow()).join('\n') || NO_USERS_LABEL,
       inline: false,
-    }] : [{
-      name: 'Vamos cerrando el soporte por hoy...',
-      value: 'Recuerden que durante la semana pueden dejar sus consultas en el '
-          + '[foro de GitHub](https://faq.utnso.com.ar/foro)',
-      inline: false,
-    }];
+    }] : [];
   }
 
   getFooter(): EmbedFooterData {
-    if (this.isTerminated) {
-      return {
-        text: '¡Que tengan buena semana!',
-      };
-    }
-    if (this.isClosed) {
-      return {
-        text: 'La fila se encuentra cerrada.',
-      };
-    }
     return {
-      text: 'Usá los botones para entrar o salir de la fila.',
+      text: this.isClosed
+        ? 'La fila se encuentra cerrada.'
+        : 'Usá los botones para entrar o salir de la fila.',
     };
   }
 
