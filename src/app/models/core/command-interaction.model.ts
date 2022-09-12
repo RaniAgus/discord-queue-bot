@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { CommandInteraction, CommandInteractionOptionResolver, GuildMember } from 'discord.js';
 import { App } from './app.model';
 import { BotInteraction } from '../discord/interaction.model';
 import { BotCommandParams } from './command-params.model';
@@ -15,13 +15,10 @@ export class BotCommandInteraction implements BotBaseInteraction {
     public params: BotCommandParams,
   ) {}
 
-  static of = (
-    commandInteraction: CommandInteraction,
-    app: App,
-  ): BotCommandInteraction => ({
+  static of = (commandInteraction: CommandInteraction, app: App): BotCommandInteraction => ({
     app,
     interaction: new BotInteraction(commandInteraction),
-    params: new BotCommandParams(commandInteraction.options),
+    params: new BotCommandParams(commandInteraction.options as CommandInteractionOptionResolver),
     member: commandInteraction.member instanceof GuildMember
       ? new BotGuildMember(commandInteraction.member) : null,
     textChannel: commandInteraction.channel !== null

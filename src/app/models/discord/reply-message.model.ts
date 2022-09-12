@@ -1,30 +1,33 @@
 import {
-  MessageEmbed,
-  MessageActionRow,
-  MessageAttachment,
-  MessageButton,
-  MessageSelectMenu,
-  MessageActionRowComponentResolvable,
+  EmbedBuilder,
+  AttachmentBuilder,
+  InteractionUpdateOptions,
+  InteractionReplyOptions,
+  ActionRowBuilder,
+  APIMessageActionRowComponent,
+  APIActionRowComponent,
+  MessageActionRowComponentBuilder,
 } from 'discord.js';
 
 export interface BotReplyMessage {
   content?: string | null;
   ephemeral?: boolean;
-  embeds?: MessageEmbed[];
-  components?: MessageActionRow[];
-  files?: MessageAttachment[];
+  embeds?: EmbedBuilder[];
+  components?: APIActionRowComponent<APIMessageActionRowComponent>[];
+  files?: AttachmentBuilder[];
 }
 
-export class BotReplyMessageBuilder implements BotReplyMessage {
+export class BotReplyMessageBuilder
+implements InteractionReplyOptions, InteractionUpdateOptions {
   content?: string | null;
 
   ephemeral?: boolean;
 
-  embeds: MessageEmbed[];
+  embeds: EmbedBuilder[];
 
-  components: MessageActionRow[];
+  components: APIActionRowComponent<APIMessageActionRowComponent>[];
 
-  files: MessageAttachment[];
+  files: AttachmentBuilder[];
 
   constructor(options?: BotReplyMessage) {
     this.content = options?.content;
@@ -44,24 +47,21 @@ export class BotReplyMessageBuilder implements BotReplyMessage {
     return this;
   }
 
-  addEmbed(embed: MessageEmbed): this {
-    this.embeds.push(embed);
+  setEmbed(embed: EmbedBuilder): this {
+    this.embeds = [embed];
     return this;
   }
 
-  addButtonsRow(buttons: MessageButton[]): this {
-    this.addComponents(buttons);
-    return this;
-  }
-
-  addSelectMenuRow(selects: MessageSelectMenu[]): this {
-    this.addComponents(selects);
-    return this;
-  }
-
-  private addComponents(components: MessageActionRowComponentResolvable[]) {
+  setComponents(components: MessageActionRowComponentBuilder[]): this {
     if (components.length > 0) {
-      this.components.push(new MessageActionRow().addComponents(components));
+      this.components = [
+        new ActionRowBuilder<MessageActionRowComponentBuilder>()
+          .setComponents(components)
+          .toJSON(),
+      ];
+    } else {
+      this.components = [];
     }
+    return this;
   }
 }

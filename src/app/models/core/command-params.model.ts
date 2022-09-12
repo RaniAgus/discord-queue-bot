@@ -1,12 +1,11 @@
-import { APIRole } from 'discord-api-types/v9';
 import {
-  VoiceChannel, Role, CommandInteractionOptionResolver, GuildMember,
+  VoiceChannel, Role, CommandInteractionOptionResolver, GuildMember, APIRole,
 } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { BotGuildMember } from '../discord/guild-member.model';
 
 export class BotCommandParams {
-  constructor(private resolver: Omit<CommandInteractionOptionResolver, 'getMessage' | 'getFocused'>) {}
+  constructor(private resolver: CommandInteractionOptionResolver) {}
 
   getString(key: string): string {
     const value = this.resolver.getString(key);

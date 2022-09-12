@@ -1,7 +1,7 @@
-import { ModalSubmitFieldsResolver } from 'discord.js';
+import { ModalSubmitFields } from 'discord.js';
 
 export class BotModalFields {
-  constructor(private resolver: ModalSubmitFieldsResolver) {}
+  constructor(private resolver: ModalSubmitFields) {}
 
   getTextInputValue(customId: string): string {
     return this.resolver.getTextInputValue(customId);

@@ -1,4 +1,4 @@
-import { MessageSelectMenu } from 'discord.js';
+import { SelectMenuBuilder } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { BotSelectHandler } from '../../models/core/select-handler.model';
 import { BotSelectInteraction } from '../../models/core/select-interaction.model';
@@ -8,8 +8,8 @@ import { memberAddedReply } from '../../replies/member-added.reply';
 import { getCurrentTime } from '../../utils/time';
 
 export const group: BotSelectHandler = {
-  get data(): MessageSelectMenu {
-    return new MessageSelectMenu()
+  get data(): SelectMenuBuilder {
+    return new SelectMenuBuilder()
       .setCustomId('group')
       .setPlaceholder('Seleccionar grupo...');
   },
@@ -29,7 +29,7 @@ export const group: BotSelectHandler = {
     queue.add(queueMember);
     reference.sendToThread(memberAddedReply({ queue, queueMember }));
 
-    return interaction.update(
+    await interaction.update(
       new BotReplyMessageBuilder()
         .setContent(`Ingresaste a la fila ${queue.name} con éxito.`)
         .setEphemeral(true),

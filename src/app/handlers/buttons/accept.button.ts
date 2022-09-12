@@ -1,13 +1,13 @@
-import { MessageButton } from 'discord.js';
+import { ButtonStyle, ButtonBuilder } from 'discord.js';
 import { BotButtonHandler } from '../../models/core/button-handler.model';
 import { BotButtonInteraction } from '../../models/core/button-interaction.model';
 
 export const accept: BotButtonHandler = {
-  get data(): MessageButton {
-    return new MessageButton()
+  get data(): ButtonBuilder {
+    return new ButtonBuilder()
       .setCustomId('accept')
       .setLabel('Aceptar')
-      .setStyle('PRIMARY')
+      .setStyle(ButtonStyle.Primary)
       .setEmoji('🚀');
   },
   hasPermissions({ member, message }: BotButtonInteraction): boolean {

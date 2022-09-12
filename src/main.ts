@@ -1,5 +1,4 @@
-import { Client, Intents } from 'discord.js';
-import { REST } from '@discordjs/rest';
+import { Client, GatewayIntentBits } from 'discord.js';
 import { env } from './app/environment';
 import { handleReady } from './app/handlers/ready.handler';
 import {
@@ -16,15 +15,13 @@ import { QueueService } from './app/models/queue/queue.service';
 
 export const client = new Client({
   intents: [
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_VOICE_STATES,
-    Intents.FLAGS.GUILD_MESSAGES,
-    Intents.FLAGS.DIRECT_MESSAGES,
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.DirectMessages,
   ],
   partials: [],
 });
-
-export const rest = new REST({ version: '9' }).setToken(env.DISCORD_TOKEN);
 
 export const logger = new LogChannel();
 
@@ -38,7 +35,6 @@ export const queueService = new QueueService({
 
 export const app: App = {
   client,
-  rest,
   logger,
   queueService,
   groupService,
@@ -50,6 +46,6 @@ export const app: App = {
 (async () => {
   client.on('ready', () => handleReady(client, logger));
   client.on('interactionCreate', (interaction) => handleInteractionCreate(logger, app, interaction));
-  await deployCommands(rest);
+  await deployCommands(client);
   client.login(env.DISCORD_TOKEN);
 })();

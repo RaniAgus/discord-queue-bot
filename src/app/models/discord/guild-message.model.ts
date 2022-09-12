@@ -1,13 +1,13 @@
-import { APIEmbed, APIEmbedField } from 'discord-api-types/v9';
 import {
   EmbedField,
   Guild,
   Message,
   MessageActionRowComponent,
-  MessageEmbed,
   MessageMentions,
   StartThreadOptions,
   ThreadChannel,
+  APIEmbedField,
+  Embed,
 } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { Dictionary } from '../collection.model';
@@ -30,7 +30,7 @@ export class BotMessage {
   }
 
   get mentionedMembers(): string[] {
-    return this.message.content.match(MessageMentions.USERS_PATTERN)?.map((s) => s) || [];
+    return this.message.content.match(MessageMentions.UsersPattern)?.map((s) => s) || [];
   }
 
   createThread(options: StartThreadOptions): Promise<ThreadChannel> {
@@ -42,7 +42,8 @@ export class BotMessage {
   }
 
   async edit(reply: BotReplyMessage): Promise<BotMessage> {
-    return this.message.edit(reply).then((m) => new BotMessage(m));
+    return this.message.edit(reply)
+      .then((m) => new BotMessage(m));
   }
 
   getEmbedAuthor(): string {
@@ -66,7 +67,7 @@ export class BotMessage {
   }
 
   isActionDisabled(customId: string): boolean {
-    return this.actions.get(customId).disabled;
+    return this.actions.get(customId).disabled ?? false;
   }
 
   delete(): Promise<Message<boolean>> {
@@ -88,7 +89,7 @@ export class BotMessage {
     return guild;
   }
 
-  private get embed(): MessageEmbed | APIEmbed {
+  private get embed(): Embed {
     const [embed] = this.message.embeds;
     if (!embed) {
       throw new InternalBotError(`El mensaje #${this.id} no posee ningún embed.`);

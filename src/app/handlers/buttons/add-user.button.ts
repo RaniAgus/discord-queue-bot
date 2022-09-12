@@ -1,4 +1,4 @@
-import { MessageButton } from 'discord.js';
+import { ButtonStyle, ButtonBuilder } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { memberAddedReply } from '../../replies/member-added.reply';
 import { BotButtonHandler } from '../../models/core/button-handler.model';
@@ -7,11 +7,11 @@ import { QueueMember } from '../../models/queue/queue-member.model';
 import { getCurrentTime } from '../../utils/time';
 
 export const addUser: BotButtonHandler = {
-  get data(): MessageButton {
-    return new MessageButton()
+  get data(): ButtonBuilder {
+    return new ButtonBuilder()
       .setCustomId('addUser')
       .setLabel('Entrar')
-      .setStyle('SUCCESS')
+      .setStyle(ButtonStyle.Primary)
       .setEmoji('▶️');
   },
   hasPermissions(_: BotButtonInteraction): boolean {

@@ -1,17 +1,23 @@
-import { Collection, MessageButton } from 'discord.js';
+import { Collection, ButtonBuilder } from 'discord.js';
 import {
   concatMap, Observable, Subscription, takeWhile,
 } from 'rxjs';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
-import { fetchQueue, fetchQueueReply } from '../../replies/queue.reply';
+import { fetchQueue, queueReply } from '../../replies/queue.reply';
 import { Dictionary } from '../collection.model';
 import { BotMessage } from '../discord/guild-message.model';
 import { LogChannel } from '../logger.model';
 import { GroupService } from './group.service';
 import { Queue } from './queue.model';
 
+type QueueServiceConfig = {
+  buttons: Dictionary<ButtonBuilder>,
+  logger: LogChannel,
+  groupService: GroupService
+};
+
 export class QueueService {
-  private buttons: Dictionary<MessageButton>;
+  private buttons: Dictionary<ButtonBuilder>;
 
   private logger: LogChannel;
 
@@ -19,9 +25,7 @@ export class QueueService {
 
   private groupService: GroupService;
 
-  constructor(
-    config: { buttons: Dictionary<MessageButton>, logger: LogChannel, groupService: GroupService },
-  ) {
+  constructor(config: QueueServiceConfig) {
     this.buttons = config.buttons;
     this.logger = config.logger;
     this.groupService = config.groupService;
@@ -57,7 +61,7 @@ export class QueueService {
     return subject
       .pipe(
         takeWhile((queue) => !queue.isTerminated, true),
-        concatMap((queue) => message.edit(fetchQueueReply({ queue, buttons: this.buttons }))),
+        concatMap((queue) => message.edit(queueReply({ queue, buttons: this.buttons }))),
       )
       .subscribe({
         next: (uploadedMessage) => { message = uploadedMessage; },

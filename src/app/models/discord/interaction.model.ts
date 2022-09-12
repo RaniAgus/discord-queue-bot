@@ -1,5 +1,5 @@
 import {
-  ButtonInteraction, CommandInteraction, Message, Modal, ModalSubmitInteraction,
+  ButtonInteraction, CommandInteraction, Message, ModalBuilder, ModalSubmitInteraction,
 } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { BotMessage } from './guild-message.model';
@@ -23,15 +23,12 @@ export class BotInteraction {
   }
 
   async deferReply(): Promise<BotMessage> {
-    const message = await this.interaction.deferReply({ fetchReply: true });
-    if (!(message instanceof Message)) {
-      throw new InternalBotError('Ocurrió un error al diferir la respuesta.');
-    }
-    return new BotMessage(message);
+    return this.interaction.deferReply({ fetchReply: true })
+      .then((message) => new BotMessage(message));
   }
 
   async reply(reply: BotReplyMessage): Promise<void> {
-    return this.interaction.reply(reply);
+    await this.interaction.reply(reply);
   }
 
   async replyAndFetch(reply: BotReplyMessage): Promise<BotMessage> {
@@ -50,7 +47,7 @@ export class BotInteraction {
     await this.interaction.followUp(reply);
   }
 
-  async showModal(modal: Modal): Promise<void> {
+  async showModal(modal: ModalBuilder): Promise<void> {
     if (this.interaction instanceof ModalSubmitInteraction) {
       throw new InternalBotError('¡No puede mostrarse un modal sobre otro!');
     }

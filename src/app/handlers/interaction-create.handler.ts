@@ -1,4 +1,6 @@
-import { Interaction } from 'discord.js';
+import {
+  ButtonInteraction, Interaction, InteractionType,
+} from 'discord.js';
 import { LayerEightError } from '../exceptions/layer-eight.error';
 import { Dictionary } from '../models/collection.model';
 import { App } from '../models/core/app.model';
@@ -41,36 +43,40 @@ export async function handleInteractionCreate(
   app: App,
   interaction: Interaction,
 ) {
-  if (!interaction.isButton() && !interaction.isCommand()
-    && !interaction.isModalSubmit() && !interaction.isSelectMenu()) {
-    return;
-  }
-
+  // TODO: Find a better way to do this
   try {
-    if (interaction.isButton()) {
-      await handle(
-        buttons,
-        interaction.customId,
-        () => BotButtonInteraction.of(interaction, app),
-      );
-    } else if (interaction.isCommand()) {
-      await handle(
-        commands,
-        interaction.commandName,
-        () => BotCommandInteraction.of(interaction, app),
-      );
-    } else if (interaction.isModalSubmit()) {
-      await handle(
-        modals,
-        interaction.customId,
-        () => BotModalInteraction.of(interaction, app),
-      );
-    } else if (interaction.isSelectMenu()) {
-      await handle(
-        selects,
-        interaction.customId,
-        () => BotSelectInteraction.of(interaction, app),
-      );
+    switch (interaction.type) {
+      case InteractionType.ApplicationCommand:
+        await handle(
+          commands,
+          interaction.commandName,
+          () => BotCommandInteraction.of(interaction, app),
+        );
+        break;
+      case InteractionType.MessageComponent:
+        if (interaction instanceof ButtonInteraction) {
+          await handle(
+            buttons,
+            interaction.customId,
+            () => BotButtonInteraction.of(interaction, app),
+          );
+        } else {
+          await handle(
+            selects,
+            interaction.customId,
+            () => BotSelectInteraction.of(interaction, app),
+          );
+        }
+        break;
+      case InteractionType.ModalSubmit:
+        await handle(
+          modals,
+          interaction.customId,
+          () => BotModalInteraction.of(interaction, app),
+        );
+        break;
+      default:
+        logger.log('Se recibió una interacción desconocida.');
     }
   } catch (error) {
     const reply: BotReplyMessage = new BotReplyMessageBuilder()
@@ -78,10 +84,16 @@ export async function handleInteractionCreate(
       .setEphemeral(true);
 
     if (interaction.isSelectMenu()) {
-      interaction.update(reply).catch(() => interaction.editReply(reply));
+      interaction
+        .update(reply)
+        .catch(() => interaction.editReply(reply));
+    } else if (interaction.isAutocomplete()) {
+      interaction.respond([]);
     } else {
-      interaction.reply(reply).catch(() => interaction.followUp(reply));
+      interaction
+        .reply(reply)
+        .catch(() => interaction.followUp(reply));
     }
-    await logger.logError(error);
+    logger.logError(error);
   }
 }

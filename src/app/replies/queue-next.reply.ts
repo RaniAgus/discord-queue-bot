@@ -1,10 +1,10 @@
-import { MessageButton } from 'discord.js';
+import { ButtonBuilder } from 'discord.js';
 import { Dictionary } from '../models/collection.model';
 import { BotGuildMember } from '../models/discord/guild-member.model';
 import { BotReplyMessage, BotReplyMessageBuilder } from '../models/discord/reply-message.model';
 
 type QueueNextReplyOptions = {
-  buttons: Dictionary<MessageButton>
+  buttons: Dictionary<ButtonBuilder>
   member: BotGuildMember
 };
 
@@ -15,6 +15,6 @@ export function queueNextReply({ member, buttons }: QueueNextReplyOptions): BotR
       .setEphemeral(true)
     : new BotReplyMessageBuilder()
       .setContent(`Sigue ${member.tag}. No se encuentra en ningún canal.`)
-      .addButtonsRow(buttons.getMultiple('mentionUser'))
+      .setComponents(buttons.getMultiple('mentionUser'))
       .setEphemeral(true);
 }

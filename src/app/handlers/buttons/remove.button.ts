@@ -1,14 +1,14 @@
-import { MessageButton } from 'discord.js';
+import { ButtonBuilder, ButtonStyle } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { BotButtonHandler } from '../../models/core/button-handler.model';
 import { BotButtonInteraction } from '../../models/core/button-interaction.model';
 
 export const remove: BotButtonHandler = {
-  get data(): MessageButton {
-    return new MessageButton()
+  get data(): ButtonBuilder {
+    return new ButtonBuilder()
       .setCustomId('remove')
       .setLabel('Salir')
-      .setStyle('SECONDARY')
+      .setStyle(ButtonStyle.Secondary)
       .setEmoji('⏹️');
   },
   hasPermissions(_: BotButtonInteraction): boolean {

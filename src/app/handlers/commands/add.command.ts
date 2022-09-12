@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { memberAddedReply } from '../../replies/member-added.reply';
 import { BotCommandHandler } from '../../models/core/command-handler.model';

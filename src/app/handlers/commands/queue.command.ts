@@ -1,10 +1,10 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { fetchQueueReply } from '../../replies/queue.reply';
+import { SlashCommandBuilder } from 'discord.js';
 import { SupportQueue } from '../../models/queue/support-queue.model';
 import { BotCommandHandler } from '../../models/core/command-handler.model';
 import { BotCommandInteraction } from '../../models/core/command-interaction.model';
 import { QueueType } from '../../models/queue/queue.model';
 import { LaboQueue } from '../../models/queue/labo-queue.model';
+import { queueReply } from '../../replies/queue.reply';
 
 export const queue: BotCommandHandler = {
   get data() {
@@ -35,14 +35,15 @@ export const queue: BotCommandHandler = {
     await reply.createThread({ name });
 
     const options = { id: reply.id, name, members: [] };
-    const createdQueue = type === 'SUPPORT'
-      ? new SupportQueue(options)
-      : new LaboQueue({ ...options, schedules: await app.groupService.getLaboSchedules() });
+    const createdQueue = await {
+      SUPPORT: () => new SupportQueue(options),
+      LABORATORY: async () => new LaboQueue(
+        { ...options, schedules: await app.groupService.getLaboSchedules() },
+      ),
+    }[type]();
+
     app.queueService.put(createdQueue, reply);
 
-    return interaction.editReply(fetchQueueReply({
-      buttons: app.buttons,
-      queue: createdQueue,
-    }));
+    return interaction.editReply(queueReply({ queue: createdQueue, buttons: app.buttons }));
   },
 };

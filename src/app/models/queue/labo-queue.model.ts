@@ -1,4 +1,4 @@
-import { EmbedField, EmbedFooterData, MessageButton } from 'discord.js';
+import { EmbedField, EmbedFooterData, ButtonBuilder } from 'discord.js';
 import { InternalBotError } from '../../exceptions/internal-bot.error';
 import { queueNextGroupReply } from '../../replies/queue-next-group.reply';
 import { Dictionary } from '../collection.model';
@@ -55,8 +55,13 @@ export class LaboQueue extends Queue {
     };
   }
 
-  getAddButtonId(): string {
-    return 'addGroup';
+  getButtonsRow(buttons: Dictionary<ButtonBuilder>): ButtonBuilder[] {
+    return this.isTerminated ? buttons.getMultiple('erase') : [
+      buttons.get('next').setDisabled(this.isTerminated),
+      buttons.get('addGroup').setDisabled(this.isClosed),
+      buttons.get('remove').setDisabled(this.isTerminated),
+      buttons.get('close').setDisabled(this.isClosed),
+    ];
   }
 
   isEmpty(): boolean {
@@ -85,7 +90,7 @@ export class LaboQueue extends Queue {
     return schedule?.nextMembers() ?? [];
   }
 
-  nextMessage(next: QueueMember[], buttons: Dictionary<MessageButton>) {
+  nextMessage(next: QueueMember[], buttons: Dictionary<ButtonBuilder>) {
     return queueNextGroupReply({ buttons, members: next });
   }
 

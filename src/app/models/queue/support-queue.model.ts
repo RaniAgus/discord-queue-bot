@@ -1,4 +1,4 @@
-import { EmbedField, EmbedFooterData, MessageButton } from 'discord.js';
+import { EmbedField, EmbedFooterData, ButtonBuilder } from 'discord.js';
 import { queueNextReply } from '../../replies/queue-next.reply';
 import { Dictionary } from '../collection.model';
 import { BotGuildMember } from '../discord/guild-member.model';
@@ -43,8 +43,14 @@ export class SupportQueue extends Queue {
     };
   }
 
-  getAddButtonId(): string {
-    return 'addUser';
+  getButtonsRow(buttons: Dictionary<ButtonBuilder>): ButtonBuilder[] {
+    return this.isTerminated
+      ? [buttons.get('erase')] : [
+        buttons.get('next').setDisabled(this.isTerminated),
+        buttons.get('addUser').setDisabled(this.isClosed),
+        buttons.get('remove').setDisabled(this.isTerminated),
+        buttons.get('close').setDisabled(this.isClosed),
+      ];
   }
 
   isEmpty(): boolean {
@@ -70,7 +76,7 @@ export class SupportQueue extends Queue {
     return next ? [next] : [];
   }
 
-  nextMessage([next]: QueueMember[], buttons: Dictionary<MessageButton>) {
+  nextMessage([next]: QueueMember[], buttons: Dictionary<ButtonBuilder>) {
     return queueNextReply({ buttons, member: next.member });
   }
 

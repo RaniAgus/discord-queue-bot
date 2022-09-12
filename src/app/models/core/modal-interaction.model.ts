@@ -15,15 +15,13 @@ export class BotModalInteraction implements BotBaseInteraction {
     public textChannel: BotTextChannel | null,
   ) {}
 
-  static of(modalInteraction: ModalSubmitInteraction, app: App): BotModalInteraction {
-    return {
-      app,
-      member: modalInteraction.member instanceof GuildMember
-        ? new BotGuildMember(modalInteraction.member) : null,
-      interaction: new BotInteraction(modalInteraction),
-      fields: new BotModalFields(modalInteraction.fields),
-      textChannel: modalInteraction.channel !== null
-        ? new BotTextChannel(modalInteraction.channel) : null,
-    };
-  }
+  static of = (modalInteraction: ModalSubmitInteraction, app: App): BotModalInteraction => ({
+    app,
+    member: modalInteraction.member instanceof GuildMember
+      ? new BotGuildMember(modalInteraction.member) : null,
+    interaction: new BotInteraction(modalInteraction),
+    fields: new BotModalFields(modalInteraction.fields),
+    textChannel: modalInteraction.channel !== null
+      ? new BotTextChannel(modalInteraction.channel) : null,
+  });
 }

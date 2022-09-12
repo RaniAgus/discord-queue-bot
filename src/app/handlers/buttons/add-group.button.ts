@@ -1,14 +1,14 @@
-import { MessageButton } from 'discord.js';
+import { ButtonStyle, ButtonBuilder } from 'discord.js';
 import { BotButtonHandler } from '../../models/core/button-handler.model';
 import { BotButtonInteraction } from '../../models/core/button-interaction.model';
 import { selectScheduleReply } from '../../replies/select-schedule.reply';
 
 export const addGroup: BotButtonHandler = {
-  get data(): MessageButton {
-    return new MessageButton()
+  get data(): ButtonBuilder {
+    return new ButtonBuilder()
       .setCustomId('addGroup')
       .setLabel('Entrar')
-      .setStyle('SUCCESS')
+      .setStyle(ButtonStyle.Primary)
       .setEmoji('▶️');
   },
   hasPermissions(_: BotButtonInteraction): boolean {

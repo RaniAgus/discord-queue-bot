@@ -1,4 +1,4 @@
-FROM node:16.13.0 as builder
+FROM node:16.16.0 as builder
 
 WORKDIR /app
 
@@ -11,13 +11,13 @@ COPY . .
 RUN npm run build
 
 
-FROM node:16.13.0-alpine
+FROM node:16.16.0-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --only=prod --ignore-scripts
+RUN npm ci --omit=dev --ignore-scripts
 
 COPY --from=builder /app/dist/ dist/
 COPY --from=builder /app/assets/ assets/

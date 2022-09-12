@@ -1,4 +1,4 @@
-import { MessageButton, MessageEmbed } from 'discord.js';
+import { ButtonBuilder, EmbedBuilder } from 'discord.js';
 import { Dictionary } from '../models/collection.model';
 import { BotMessage } from '../models/discord/guild-message.model';
 import { BotReplyMessage, BotReplyMessageBuilder } from '../models/discord/reply-message.model';
@@ -9,15 +9,15 @@ import { LaboQueue } from '../models/queue/labo-queue.model';
 import { GroupService } from '../models/queue/group.service';
 
 type QueueReplyOptions = {
-  buttons: Dictionary<MessageButton>,
+  buttons: Dictionary<ButtonBuilder>,
   queue: Queue,
 };
 
-export function fetchQueueReply({ queue, buttons }: QueueReplyOptions): BotReplyMessage {
+export function queueReply({ queue, buttons }: QueueReplyOptions): BotReplyMessage {
   return new BotReplyMessageBuilder()
     .setContent(queue.getType())
-    .addEmbed(
-      new MessageEmbed()
+    .setEmbed(
+      new EmbedBuilder()
         .setAuthor({
           name: `Fila "${queue.name}"`,
           url: 'https://www.youtube.com/watch?v=xvFZjo5PgG0',
@@ -26,7 +26,7 @@ export function fetchQueueReply({ queue, buttons }: QueueReplyOptions): BotReply
         .setFooter(queue.getFooter())
         .setFields(queue.getFields()),
     )
-    .addButtonsRow(queue.getButtonsRow(buttons));
+    .setComponents(queue.getButtonsRow(buttons));
 }
 
 export async function fetchQueue(message: BotMessage, groupService: GroupService): Promise<Queue> {

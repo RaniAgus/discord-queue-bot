@@ -1,4 +1,4 @@
-import { ButtonInteraction, GuildMember, Message } from 'discord.js';
+import { ButtonInteraction, GuildMember } from 'discord.js';
 import { App } from './app.model';
 import { BotMessage } from '../discord/guild-message.model';
 import { BotGuildMember } from '../discord/guild-member.model';
@@ -31,18 +31,12 @@ export class BotButtonInteraction implements BotBaseInteraction {
         buttonInteraction.user.dmChannel ?? await buttonInteraction.user.createDM(),
       );
 
-    // Si el mensaje es un DM, viene una instancia de APIMessage, por lo que
-    // hay que obtener el mensaje completo desde el channel
-    const message = buttonInteraction.message instanceof Message
-      ? new BotMessage(buttonInteraction.message)
-      : await textChannel.fetchMessage(buttonInteraction.message.id);
-
     return {
       app,
       member,
       interaction,
       textChannel,
-      message,
+      message: new BotMessage(buttonInteraction.message),
     };
   }
 }

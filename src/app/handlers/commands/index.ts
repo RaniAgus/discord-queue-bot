@@ -1,5 +1,4 @@
-import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/rest/v9';
+import { Client, Routes } from 'discord.js';
 import { Dictionary } from '../../models/collection.model';
 import { add } from './add.command';
 import { BotCommandHandler } from '../../models/core/command-handler.model';
@@ -15,8 +14,9 @@ export const commands = new Dictionary<BotCommandHandler>({
   queue,
 });
 
-export async function deployCommands(rest: REST) {
-  return rest.put(
+export async function deployCommands(client: Client) {
+  client.rest.setToken(env.DISCORD_TOKEN);
+  await client.rest.put(
     Routes.applicationGuildCommands(env.APPLICATION_ID, env.GUILD_ID),
     { body: commands.map((h) => h.data) },
   );

@@ -1,14 +1,14 @@
-import { MessageButton } from 'discord.js';
+import { ButtonBuilder, ButtonStyle } from 'discord.js';
 import { BotButtonHandler } from '../../models/core/button-handler.model';
 import { BotButtonInteraction } from '../../models/core/button-interaction.model';
 
 // No puedo llamarlo 'delete' porque es palabra reservada :(
 export const erase: BotButtonHandler = {
-  get data(): MessageButton {
-    return new MessageButton()
+  get data(): ButtonBuilder {
+    return new ButtonBuilder()
       .setCustomId('erase')
       .setLabel('Eliminar')
-      .setStyle('DANGER')
+      .setStyle(ButtonStyle.Danger)
       .setEmoji('🗑️');
   },
   hasPermissions({ interaction, member }: BotButtonInteraction): boolean {

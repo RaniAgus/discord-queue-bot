@@ -1,4 +1,4 @@
-import { ToAPIApplicationCommandOptions } from '@discordjs/builders';
+import { ToAPIApplicationCommandOptions } from 'discord.js';
 import { BotCommandInteraction } from './command-interaction.model';
 import { BotBaseHandler } from './base-handler.model';
 

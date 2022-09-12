@@ -1,5 +1,4 @@
-import { EmbedFooterData } from '@discordjs/builders';
-import { EmbedField, MessageButton } from 'discord.js';
+import { EmbedFooterData, EmbedField, ButtonBuilder } from 'discord.js';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { LayerEightError } from '../../exceptions/layer-eight.error';
 import { Dictionary } from '../collection.model';
@@ -40,7 +39,7 @@ export abstract class Queue {
     return queueMember;
   }
 
-  next(buttons: Dictionary<MessageButton>): BotReplyMessage {
+  next(buttons: Dictionary<ButtonBuilder>): BotReplyMessage {
     if (this.isEmpty()) {
       throw new LayerEightError(`No hay nadie esperando en la fila ${this.name}.`);
     }
@@ -59,24 +58,15 @@ export abstract class Queue {
     return mapper(this.$changed);
   }
 
-  getButtonsRow(buttons: Dictionary<MessageButton>): MessageButton[] {
-    return this.isTerminated ? buttons.getMultiple('erase') : [
-      buttons.get('next').setDisabled(this.isTerminated),
-      buttons.get(this.getAddButtonId()).setDisabled(this.isClosed),
-      buttons.get('remove').setDisabled(this.isTerminated),
-      buttons.get('close').setDisabled(this.isClosed),
-    ];
-  }
-
   abstract getType(): QueueType;
   abstract getFields(): EmbedField[];
   abstract getFooter(): EmbedFooterData;
-  protected abstract getAddButtonId(): string;
+  abstract getButtonsRow(buttons: Dictionary<ButtonBuilder>): ButtonBuilder[];
   protected abstract isEmpty(): boolean;
   protected abstract hasMember(member: BotGuildMember): boolean;
   protected abstract addMember(member: QueueMember): void;
   protected abstract removeMember(member: BotGuildMember): QueueMember;
   protected abstract nextMembers(): QueueMember[];
   protected abstract nextMessage(
-    next: QueueMember[], buttons: Dictionary<MessageButton>): BotReplyMessage;
+    next: QueueMember[], buttons: Dictionary<ButtonBuilder>): BotReplyMessage;
 }

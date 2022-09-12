@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 import { BotCommandHandler } from '../../models/core/command-handler.model';
 import { BotCommandInteraction } from '../../models/core/command-interaction.model';
 import { groupsLoadedReply } from '../../replies/groups-loaded.reply';

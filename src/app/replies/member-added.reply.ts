@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { BotReplyMessage, BotReplyMessageBuilder } from '../models/discord/reply-message.model';
 import { QueueMember } from '../models/queue/queue-member.model';
 import { Queue } from '../models/queue/queue.model';
@@ -9,8 +9,8 @@ type MemberAddedReplyOptions = {
 };
 
 export function memberAddedReply({ queueMember, queue }: MemberAddedReplyOptions): BotReplyMessage {
-  return new BotReplyMessageBuilder().addEmbed(
-    new MessageEmbed()
+  return new BotReplyMessageBuilder().setEmbed(
+    new EmbedBuilder()
       .setAuthor({
         name: '▶️ Usuario agregado',
         iconURL: queueMember.member.avatarUrl,

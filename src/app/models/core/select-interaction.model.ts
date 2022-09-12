@@ -1,4 +1,4 @@
-import { GuildMember, Message, SelectMenuInteraction } from 'discord.js';
+import { GuildMember, SelectMenuInteraction } from 'discord.js';
 import { BotGuildMember } from '../discord/guild-member.model';
 import { BotMessage } from '../discord/guild-message.model';
 import { App } from './app.model';
@@ -13,18 +13,14 @@ export class BotSelectInteraction implements BotBaseInteraction {
     public values: string[],
   ) {}
 
-  static async of(
-    selectInteraction: SelectMenuInteraction,
-    app: App,
-  ): Promise<BotSelectInteraction> {
-    return {
+  static async of(selInteraction: SelectMenuInteraction, app: App): Promise<BotSelectInteraction> {
+    return ({
       app,
-      interaction: selectInteraction,
-      member: selectInteraction.member instanceof GuildMember
-        ? new BotGuildMember(selectInteraction.member) : null,
-      reference: selectInteraction.message instanceof Message
-        ? new BotMessage(await selectInteraction.message.fetchReference()) : null,
-      values: selectInteraction.values,
-    };
+      interaction: selInteraction,
+      member: selInteraction.member instanceof GuildMember
+        ? new BotGuildMember(selInteraction.member) : null,
+      reference: new BotMessage(await selInteraction.message.fetchReference()),
+      values: selInteraction.values,
+    });
   }
 }
