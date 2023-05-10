@@ -33,7 +33,7 @@
     "discord.js": "^14.2.0",
     "dotenv": "^16.0.1",
     "rxjs": "^7.5.5",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz"
   },
   "devDependencies": {
     "@types/node": "^16.11.47",
